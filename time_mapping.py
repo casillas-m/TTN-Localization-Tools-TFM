@@ -26,7 +26,8 @@ def time_map_manual():
                 try:
                     end = datetime.strptime(end_time_str, "%Y-%m-%dT%H:%M:%S.%fZ")
                     print(f"End time recorded: {end.strftime("%Y-%m-%dT%H:%M:%S.%fZ")}")
-                    times.append((begin, end))
+                    place_name = input("Enter place name: ").strip()
+                    times.append({"place_name":place_name, "time_tuple":(begin, end)})
                     del begin
                 except ValueError:
                     print("Invalid time format. Please try again")
@@ -56,7 +57,8 @@ def time_map_current():
             if 'begin' in locals():
                 end = datetime.now(tz=timezone.utc)
                 print(f"End time {end.strftime("%Y-%m-%dT%H:%M:%S.%fZ")}")
-                times.append((begin, end))
+                place_name = input("Enter place name: ").strip()
+                times.append({"place_name":place_name, "time_tuple":(begin, end)})
                 del begin 
             else:
                 print("Error, begin must be first.")
@@ -70,11 +72,11 @@ def time_map_csv():
     times = []
     print("CSV time mapping")
     print("Instructions:")
-    print("Paste all the time marks in a CSV like format. Each line represents a begin-end time tuple.")
+    print("Paste all the time marks in a CSV like format. Each line represents a begin-end time tuple and its name.")
     print("Type 'F' to finish")
     print("Ex:")
-    print("2024-04-15T09:29:00.000000Z,2024-04-15T09:38:00.000000Z")
-    print("2024-04-15T10:38:00.000000Z,2024-04-15T10:00:00.000000Z")
+    print("2024-04-15T09:29:00.000000Z,2024-04-15T09:38:00.000000Z,place1")
+    print("2024-04-15T10:38:00.000000Z,2024-04-15T10:00:00.000000Z,place2")
     print("F")
     print("Enter the list:")
     while True:
@@ -82,13 +84,14 @@ def time_map_csv():
         if line == 'f':
             break
         else:
-            begin_end = line.split(",")
-            begin_time_str = begin_end[0]
-            end_time_str = begin_end[1]
+            begin_end_place = line.split(",")
+            begin_time_str = begin_end_place[0]
+            end_time_str = begin_end_place[1]
+            place_name = begin_end_place[2]
             try:
                 begin = datetime.strptime(begin_time_str, "%Y-%m-%dT%H:%M:%S.%fZ")
                 end = datetime.strptime(end_time_str, "%Y-%m-%dT%H:%M:%S.%fZ")
-                times.append((begin, end))
+                times.append({"place_name":place_name, "time_tuple":(begin, end)})
                 del begin 
                 del end
             except ValueError:
@@ -117,7 +120,10 @@ def time_map():
             print("Unknown command")
     
 def main():
-    times = time_map()
+    times_map = time_map()
+    times = []
+    for place in times_map:
+        times.append(place["time_tuple"])
     print("\nTime mapping:")
     for i, (begin, end) in enumerate(times, 1):
         print(f"Place {i}, Begin: {begin.strftime("%Y-%m-%dT%H:%M:%S.%fZ")} End: {end.strftime("%Y-%m-%dT%H:%M:%S.%fZ")}")
