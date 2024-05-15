@@ -1,7 +1,7 @@
 from secrets_folder.secrets_file import ttn_apikey
 from scipy.ndimage import gaussian_filter1d
 from scipy.stats import median_abs_deviation
-from datetime import datetime
+from datetime import datetime, timezone
 import requests
 import json
 import numpy as np
@@ -125,6 +125,14 @@ def calculate_channels_gauss_rssi(parsed_data, sigma_mode):
                 avg_rssi_per_channel[ch] = sum(rssi_list) / len(rssi_list)
         avg_rssi_per_gateway[gateway_id] = avg_rssi_per_channel
     return avg_rssi_per_gateway
+
+def get_time_range_messages(parsed_data, begin, end):
+    begin_end_messages = []
+    for message in parsed_data:
+        received_at = datetime.strptime(message["received_at"],"%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
+        if begin.replace(tzinfo=timezone.utc) <= received_at <= end.replace(tzinfo=timezone.utc):
+            begin_end_messages.append(message)
+    return begin_end_messages
 
 def main():
     url = "https://eu1.cloud.thethings.network/api/v3/as/applications/tfm-lorawan/packages/storage/uplink_message"

@@ -28,13 +28,7 @@ def main():
     for place in time_map:
       (begin, end) = place["time_tuple"]
       place_name = place["place_name"]
-      begin_end_messages = []
-      #Iterate trhough all TTN messages
-      for message in parsed_data:
-        received_at = datetime.strptime(message["received_at"],"%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
-        #Message between time begin and end
-        if begin.replace(tzinfo=timezone.utc) <= received_at <= end.replace(tzinfo=timezone.utc):
-          begin_end_messages.append(message)
+      begin_end_messages = ttn_data.get_time_range_messages(parsed_data, begin, end)
       ch_rssi_gateways = {}
       if command == 'a':
         ch_rssi_gateways = ttn_data.calculate_channels_avg_rssi(begin_end_messages)
