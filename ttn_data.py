@@ -14,6 +14,14 @@ def fetch_data(url, headers):
         print("Error code:", response.status_code)
         return []
 
+def get_last_n_messages(url, headers, msg_qty):
+    response = requests.get(url + "?limit=" + str(msg_qty) + "&order=-received_at", headers=headers)
+    if response.status_code == 200:
+        return response.text.splitlines()
+    else:
+        print("Error code:", response.status_code)
+        return []
+
 def get_channel(freq):
     channel_dict = {
         "868100000": 0,
