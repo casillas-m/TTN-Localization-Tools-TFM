@@ -1,10 +1,10 @@
-from secrets_folder.secrets_file import ttn_apikey
+from secrets_folder.secrets_file import ttn_apikey, TTN_URL
 import ttn_data
 import time_mapping
 from datetime import datetime, timezone
 
 def main(): 
-  url = "https://eu1.cloud.thethings.network/api/v3/as/applications/tfm-lorawan/packages/storage/uplink_message"
+  url = TTN_URL
   headers = {
     'Authorization': 'Bearer ' + ttn_apikey
   }

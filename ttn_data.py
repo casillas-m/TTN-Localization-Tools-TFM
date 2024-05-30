@@ -1,4 +1,4 @@
-from secrets_folder.secrets_file import ttn_apikey
+from secrets_folder.secrets_file import ttn_apikey, TTN_URL
 from scipy.ndimage import gaussian_filter1d
 from scipy.stats import median_abs_deviation
 from datetime import datetime, timezone
@@ -143,7 +143,7 @@ def get_time_range_messages(parsed_data, begin, end):
     return begin_end_messages
 
 def main():
-    url = "https://eu1.cloud.thethings.network/api/v3/as/applications/tfm-lorawan/packages/storage/uplink_message"
+    url = TTN_URL
     headers = {
       'Authorization': 'Bearer ' + ttn_apikey
     }

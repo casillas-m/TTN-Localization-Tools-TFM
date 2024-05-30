@@ -1,7 +1,7 @@
 #Mockup data for testing
 from secrets_folder.parsed_data_recorrido import parsed_data_stored
 
-from secrets_folder.secrets_file import ttn_apikey
+from secrets_folder.secrets_file import ttn_apikey, TTN_URL
 import matplotlib.pyplot as plt
 from maps.disca_map import rss_map, RSS_NULL
 from locate import least_squares_classification
@@ -118,7 +118,7 @@ def get_best_rss_null(rss_begin, rss_end, rss_step, benckmark_tests, rss_map, RS
     return best_result
 
 def main():
-    url = "https://eu1.cloud.thethings.network/api/v3/as/applications/tfm-lorawan/packages/storage/uplink_message"
+    url = TTN_URL
     headers = {
         'Authorization': 'Bearer ' + ttn_apikey
     }
