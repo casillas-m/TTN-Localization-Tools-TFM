@@ -2,10 +2,12 @@
 from secrets_folder.parsed_data_recorrido import parsed_data_stored
 mock_msg_count_test = 0
 
-from secrets_folder.secrets_file import ttn_apikey
+from secrets_folder.secrets_file import ttn_apikey, WEB_APP_URL, TTN_URL
 from maps.disca_map import rss_map, RSS_NULL
+from maps.disca_coordinates import disca_coord
 import time
 import ttn_data
+import requests
 
 def least_squares_classification(rss_map, RSS_NULL, available_gateways, new_data):
     new_data_gateways = list(new_data.keys())
@@ -55,6 +57,7 @@ def get_current_location(rss_map, RSS_NULL, available_gateways, msg_qty, connect
     #Mockup or Real data select
     global mock_msg_count_test
     if mock_msg_count_test == 0:
+        #Real
         json_data = ttn_data.get_last_n_messages(connection["url"], connection["headers"], msg_qty)
     else:
         json_data = True
@@ -91,10 +94,17 @@ def get_current_location(rss_map, RSS_NULL, available_gateways, msg_qty, connect
             #print(error_scores)
             return classification
         
+def send_to_web(location):
+    #Check if location is a GPS coord.
+    if isinstance(location, dict):
+        response = requests.post(WEB_APP_URL + '/set_point', json=location)
+    else:
+        response = requests.post(WEB_APP_URL + '/set_point', json=disca_coord[location])
+    print(response.json())
 
 def main():
     connection = {
-        "url": "https://eu1.cloud.thethings.network/api/v3/as/applications/tfm-lorawan/packages/storage/uplink_message",
+        "url": TTN_URL,
         "headers": {
             "Authorization": "Bearer " + ttn_apikey
         }
@@ -120,8 +130,14 @@ def main():
         return
     print("Current location:")
     while True:
-        current_location = get_current_location(rss_map, RSS_NULL, available_gateways, 5, connection)
-        print(current_location)
+        #current_location7 = get_current_location(rss_map, RSS_NULL, available_gateways, 7, connection)
+        current_location5 = get_current_location(rss_map, RSS_NULL, available_gateways, 5, connection)
+        #current_location3 = get_current_location(rss_map, RSS_NULL, available_gateways, 3, connection)
+        #current_location2 = get_current_location(rss_map, RSS_NULL, available_gateways, 2, connection)
+        #current_location1 = get_current_location(rss_map, RSS_NULL, available_gateways, 1, connection)
+        #print("7:",current_location7, "5:",current_location5, "3:",current_location3, "2:",current_location2, "1:",current_location1)
+        print("5:",current_location5)
+        send_to_web(current_location5)
         time.sleep(5)
         
 
