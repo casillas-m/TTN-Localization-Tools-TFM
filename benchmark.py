@@ -70,7 +70,7 @@ def run_benchmark(benckmark_tests, rss_map, RSS_NULL):
             #Check if test is not empty
             if test:
                 test_total += 1
-                classification, error_scores = least_squares_classification(rss_map, RSS_NULL, available_gateways, test)
+                classification, error_scores = least_squares_classification(rss_map, RSS_NULL, available_gateways, test, 0)
                 if place_name == classification:
                     test_correct += 1
                 if place_name[1] == classification[1]:

@@ -1,4 +1,5 @@
 .vscode
 secrets_folder/
+web/secrets_w/
 maps/
 __pycache__/

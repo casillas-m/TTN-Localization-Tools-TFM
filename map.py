@@ -22,7 +22,7 @@ def main():
       else:
         print("Unknown command")
     print("---------------------------")
-    print("RSS_NULL = -200")
+    print("RSS_NULL = -110")
     print("rss_map = {")
     #Iterate through all time tuples
     for place in time_map:
