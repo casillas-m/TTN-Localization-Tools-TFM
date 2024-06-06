@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real-time Map</title>
+    <style>
+      #container {
+        display: flex; /* Establece el contenedor para usar flexbox */
+        align-items: center; /* Alinea verticalmente los elementos al centro */
+        justify-content: flex-start; /* Alinea horizontalmente los elementos al inicio */
+      }
+      #indicator {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        margin: 0 10px;
+        border: 2px solid black;
+      }
+      .state1 {
+        background-color: rgb(10, 199, 10);
+      }
+      .state2 {
+        background-color: red;
+      }
+      button {
+        padding: 5px 10px;
+        margin-right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Real-time Map</h1>
+    <div id="container">
+      <button onclick="enable_gps()">Enable GPS</button>
+      <button onclick="disable_gps()">Disable GPS</button>
+      <div id="indicator" class="state1"></div>
+    </div>
+    <br /><br />
+    <iframe
+      src="{{ url_for('static', filename='mapa.html') }}"
+      width="100%"
+      height="490"
+    ></iframe>
+    <script>
+      setInterval(() => {
+        const iframe = document.querySelector("iframe");
+        iframe.src = iframe.src;
+
+        fetch("/gps_status", requestOptions)
+          .then((response) => response.json())
+          .then((result) => {
+            if (result.dev_interior == 1) indicator.className = "state1";
+            else indicator.className = "state2";
+          })
+          .catch((error) => console.error(error));
+      }, 10000);
+
+      const requestOptions = {
+        method: "GET",
+      };
+      function enable_gps() {
+        fetch("/gps_enable", requestOptions)
+          .then((response) => response.text())
+          .then((result) => console.log(result))
+          .catch((error) => console.error(error));
+      }
+      function disable_gps() {
+        fetch("/gps_disable", requestOptions)
+          .then((response) => response.text())
+          .then((result) => console.log(result))
+          .catch((error) => console.error(error));
+      }
+    </script>
+  </body>
+</html>
