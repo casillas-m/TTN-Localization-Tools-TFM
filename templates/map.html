@@ -50,8 +50,8 @@
         fetch("/gps_status", requestOptions)
           .then((response) => response.json())
           .then((result) => {
-            if (result.dev_interior == 1) indicator.className = "state1";
-            else indicator.className = "state2";
+            if (result.dev_interior == 1) indicator.className = "state2";
+            else indicator.className = "state1";
           })
           .catch((error) => console.error(error));
       }, 10000);

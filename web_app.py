@@ -30,6 +30,7 @@ def gps_status():
     }
     json_data = ttn_data.get_last_n_messages(connection["url"], connection["headers"], 1)
     last_messages = ttn_data.parse_json_data(json_data)
+    dev_interior = 1
     if len(last_messages) > 0:    
         last_message = last_messages[0]
         dev_interior = last_message["decoded_payload"]["digital_in_4"] #1 Interior, 0 Exterior
@@ -44,7 +45,7 @@ def gps_enable():
     payload = json.dumps({
         "downlinks": [
             {
-            "frm_payload": "SQ==",
+            "frm_payload": "RQ==",
             "f_port": 1,
             "priority": "NORMAL"
             }
@@ -63,7 +64,7 @@ def gps_disable():
     payload = json.dumps({
         "downlinks": [
             {
-            "frm_payload": "RQ==",
+            "frm_payload": "SQ==",
             "f_port": 1,
             "priority": "NORMAL"
             }
