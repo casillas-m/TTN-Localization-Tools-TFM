@@ -11,6 +11,12 @@ import random
 import copy
 
 def plot_benchmark_accuracy(benchmark_results):
+    """
+    Plot the accuracy of benchmark results over multiple runs.
+    Inputs:
+    - benchmark_results: List of dictionaries containing accuracy, zone_accuracy, and floor_accuracy.
+    This function generates a line plot showing the accuracy percentages for overall, zone, and floor accuracy over multiple benchmark runs.
+    """
     # Extracting data for plotting
     accuracy = [run["accuracy"] * 100 for run in benchmark_results] 
     zone_accuracy = [run["zone_accuracy"] * 100 for run in benchmark_results]
@@ -29,6 +35,14 @@ def plot_benchmark_accuracy(benchmark_results):
     plt.show()
 
 def generate_test_set(messages, test_qty):
+    """
+    Generate a test set by randomly distributing messages among a specified number of tests.
+    Inputs:
+    - messages: List of message dictionaries containing channel and rx_metadata.
+    - test_qty: Number of test sets to generate.
+    Outputs:
+    - Returns a list of test sets with RSSI values organized by gateway and channel.
+    """
     random.shuffle(messages)
     test_set = [{} for _ in range(test_qty)]
     for message in messages:
@@ -46,6 +60,15 @@ def generate_test_set(messages, test_qty):
     return test_set
 
 def generate_benchmark_tests(parsed_data, time_map, test_qty):
+    """
+    Create benchmark test sets from parsed data and a time map.
+    Inputs:
+    - parsed_data: Parsed data from the TTN data source.
+    - time_map: List of time range mappings with associated place names.
+    - test_qty: Number of test sets to generate for each place.
+    Outputs:
+    - Returns a dictionary of benchmark test sets organized by place name.
+    """
     benckmark_tests = {}
     for place in time_map:
         (begin, end) = place["time_tuple"]
@@ -56,6 +79,15 @@ def generate_benchmark_tests(parsed_data, time_map, test_qty):
     return benckmark_tests
 
 def run_benchmark(benckmark_tests, rss_map, RSS_NULL):
+    """
+    Run benchmark tests to evaluate the classification accuracy.
+    Inputs:
+    - benckmark_tests: Dictionary of test sets organized by place name.
+    - rss_map: RSS map for classification.
+    - RSS_NULL: Default RSSI null value for missing data.
+    Outputs:
+    - Returns a dictionary with overall, zone, and floor accuracy percentages.
+    """
     available_gateways = ["rak7248-grc-pm65","main-gtw-grc","itaca-upv-022"]
     benchmark_total = 0
     benchmark_correct = 0
@@ -67,7 +99,7 @@ def run_benchmark(benckmark_tests, rss_map, RSS_NULL):
         test_correct_zone = 0
         test_correct_floor = 0
         for test in benckmark_tests[place_name]:
-            #Check if test is not empty
+            # Check if test is not empty
             if test:
                 test_total += 1
                 classification, error_scores = least_squares_classification(rss_map, RSS_NULL, available_gateways, test, 0)
@@ -95,32 +127,49 @@ def run_benchmark(benckmark_tests, rss_map, RSS_NULL):
     return benchmark_result
             
 def get_best_rss_null(rss_begin, rss_end, rss_step, benckmark_tests, rss_map, RSS_NULL):
+    """
+    Determine the best RSS_NULL value by testing a range of values and selecting the one with the highest accuracy.
+    Inputs:
+    - rss_begin: Starting value for RSS_NULL.
+    - rss_end: Ending value for RSS_NULL.
+    - rss_step: Step size for iterating through RSS_NULL values.
+    - benckmark_tests: Dictionary of test sets organized by place name.
+    - rss_map: RSS map for classification.
+    - RSS_NULL: Default RSSI null value for missing data.
+    Outputs:
+    - Returns the best RSS_NULL value and its associated accuracy.
+    """
     rss_null_positions = []
-    #Find all RSS_NULL inside rss_map
+    # Find all RSS_NULL inside rss_map
     for place, gateways in rss_map.items():
         for gateway, rss_values in gateways.items():
             for ch, rss in rss_values.items():
                 if rss == RSS_NULL:
                     rss_null_positions.append((place,gateway,ch))
-    #Test all RSS_NULL values
+    # Test all RSS_NULL values
     benchmark_results = []
     for rss_null_value in range(rss_begin, rss_end, rss_step):
-        #Change all RSS_NULL in map
+        # Change all RSS_NULL in map
         rss_map_new = copy.deepcopy(rss_map)
         for (place,gateway,ch) in rss_null_positions:
             rss_map_new[place][gateway][ch] = rss_null_value
-        #Run benchmark using new RSS_NULL value
+        # Run benchmark using new RSS_NULL value
         benchmark_result = run_benchmark(copy.deepcopy(benckmark_tests), rss_map_new, rss_null_value)
         benchmark_results.append((rss_null_value, benchmark_result["accuracy"]))
-    #Get best RSS_NULL
-    #print(benchmark_results)
+    # Get best RSS_NULL
     best_result = max(benchmark_results, key=lambda x: x[1])
     return best_result
 
 def main():
-    url = TTN_URL
-    headers = {
-        'Authorization': 'Bearer ' + ttn_apikey
+    """
+    Main function to run the benchmarking tool for RSSI-based localization.
+    This function prompts the user to choose between using real or mockup data, then runs the benchmark tests and plots the results.
+    """
+    connection = {
+        "url": TTN_URL,
+        "headers": {
+            "Authorization": "Bearer " + ttn_apikey
+        }
     }
     json_data = []
     print("Benchmark tool")
@@ -128,7 +177,7 @@ def main():
     print("Type 'M' to use mockup data (for testing)")
     command = input("Command: ").strip().lower()
     if command == 'r':
-        json_data = ttn_data.fetch_data(url, headers)
+        json_data = ttn_data.fetch_data(connection["url"], connection["headers"])
     elif command == 'm':
         json_data = True
     else:
@@ -141,7 +190,7 @@ def main():
             parsed_data = ttn_data.parse_json_data(json_data)
         elif command == 'm':
             parsed_data = parsed_data_stored
-        #Get the best RSS_NULL value
+        # Get the best RSS_NULL value
         print("Running best RSS_NULL test...")
         rss_null_sum = 0
         rss_null_count = 0
@@ -150,10 +199,9 @@ def main():
             rss_null_result = get_best_rss_null(0, -400, -1, copy.deepcopy(benckmark_tests), copy.deepcopy(rss_map), RSS_NULL)
             rss_null_sum += rss_null_result[0]
             rss_null_count += 1
-            #print(rss_null_result)
         print("Best RSS_NULL:",rss_null_sum/rss_null_count)
         
-        #Run benchmark using the default RSS_NULL value
+        # Run benchmark using the default RSS_NULL value
         print("Running benchmark...")
         print("This test does not use the calculated RSS_NULL. Using:", RSS_NULL)
         benchmark_results = []
@@ -161,7 +209,6 @@ def main():
             benckmark_tests = generate_benchmark_tests(parsed_data, time_map, 5)
             benchmark_result = run_benchmark(copy.deepcopy(benckmark_tests), copy.deepcopy(rss_map), RSS_NULL)
             benchmark_results.append(benchmark_result)
-            #print(benchmark_result)
         plot_benchmark_accuracy(benchmark_results)
     else:
         print("No data available")

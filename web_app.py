@@ -11,10 +11,18 @@ locations = []
 
 @app.route('/')
 def index():
+    """
+    Render the main page with the map.
+    This function handles the root URL and renders the 'map.html' template.
+    """
     return render_template('map.html')
 
 @app.route('/set_point', methods=['POST'])
 def set_point():
+    """
+    Set a new point on the map based on the received JSON data.
+    This function receives JSON data via POST request, updates the locations list, and calls map_update to refresh the map.
+    """
     data = request.get_json()
     locations = [data]
     map_update(locations)
@@ -22,6 +30,10 @@ def set_point():
 
 @app.route('/gps_status', methods=['GET'])
 def gps_status():
+    """
+    Get the current GPS status of the device.
+    This function retrieves the last message from the TTN data source and extracts the 'digital_in_4' status to determine if the device is interior or exterior.
+    """
     connection = {
         "url": TTN_URL,
         "headers": {
@@ -38,6 +50,10 @@ def gps_status():
 
 @app.route('/gps_enable', methods=['GET'])
 def gps_enable():
+    """
+    Send a command to enable GPS on the device.
+    This function sends a downlink message to enable GPS on two devices.
+    """
     headers = {
         "Content-Type": "application/json",
         "Authorization": "Bearer " + ttn_apikey
@@ -57,6 +73,10 @@ def gps_enable():
 
 @app.route('/gps_disable', methods=['GET'])
 def gps_disable():
+    """
+    Send a command to disable GPS on the device.
+    This function sends a downlink message to disable GPS on two devices.
+    """
     headers = {
         "Content-Type": "application/json",
         "Authorization": "Bearer " + ttn_apikey
@@ -75,6 +95,10 @@ def gps_disable():
     return jsonify({'status': 'GPS_ENABLE_SEND'})
 
 def map_update(locations):
+    """
+    Update the map with new locations.
+    This function creates a Folium map with markers for each location and saves it as 'mapa.html' in the 'static' directory.
+    """
     if locations:
         map = folium.Map(location=[locations[0]['latitude'], locations[0]['longitude']], zoom_start=18)
 

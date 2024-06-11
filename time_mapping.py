@@ -1,6 +1,12 @@
 from datetime import datetime, timezone
 
 def time_map_manual():
+    """
+    Manually create a list of time mappings with place names.
+    Prompts the user to enter begin and end times, and the place name for each time interval.
+    Outputs:
+    - Returns a list of dictionaries with place names and corresponding time tuples.
+    """
     times = []
     print("Manual time mapping")
     print("Instructions:")
@@ -9,7 +15,6 @@ def time_map_manual():
     print("Type 'F' to finish")
     print("Please enter times in the format 'YYYY-mm-ddTHH:MM:SS.ffffffZ'")
     print("Ex. '2024-04-15T09:38:00.000000Z'")
-    
     while True:
         command = input("Command: ").strip().lower()
         if command == 'b':
@@ -37,17 +42,20 @@ def time_map_manual():
             break
         else:
             print("Unknown command")
-
     return times
 
 def time_map_current():
+    """
+    Create a list of time mappings with place names using the current system time.
+    Outputs:
+    - Returns a list of dictionaries with place names and corresponding time tuples.
+    """
     times = []
     print("Current time mapping")
     print("Instructions:")
     print("Type 'B' to take the begin time")
     print("Type 'E' to take the end time")
     print("Type 'F' to finish")
-    
     while True:
         command = input("Command: ").strip().lower()
         if command == 'b':
@@ -69,6 +77,12 @@ def time_map_current():
     return times
 
 def time_map_csv():
+    """
+    Create a list of time mappings with place names from CSV-like input.
+    Prompts the user to enter time intervals and place names in a CSV-like format.
+    Outputs:
+    - Returns a list of dictionaries with place names and corresponding time tuples.
+    """
     times = []
     print("CSV time mapping")
     print("Instructions:")
@@ -99,8 +113,13 @@ def time_map_csv():
                 return []
     return times
     
-
 def time_map():
+    """
+    Main function to choose the method for creating time mappings.
+    This function allows the user to choose between manual input, current time input, or CSV-like input for creating time mappings.
+    Outputs:
+    - Returns a list of dictionaries with place names and corresponding time tuples.
+    """
     print("Time-place mapping tool")
     print("Type 'M' to use the manual time tool")
     print("Type 'C' to use the current time tool")
@@ -120,6 +139,10 @@ def time_map():
             print("Unknown command")
     
 def main():
+    """
+    Main function to demonstrate the time mapping tool.
+    This function calls the time mapping tool and prints the resulting time mappings.
+    """
     times_map = time_map()
     times = []
     for place in times_map:
@@ -127,7 +150,6 @@ def main():
     print("\nTime mapping:")
     for i, (begin, end) in enumerate(times, 1):
         print(f"Place {i}, Begin: {begin.strftime("%Y-%m-%dT%H:%M:%S.%fZ")} End: {end.strftime("%Y-%m-%dT%H:%M:%S.%fZ")}")
-
 
 if __name__ == "__main__":
     main()
